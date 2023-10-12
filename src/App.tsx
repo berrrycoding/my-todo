@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { FiCheck, FiChevronLeft, FiChevronRight, FiPlus } from "react-icons/fi";
+import {
+  FiCheck,
+  FiChevronLeft,
+  FiChevronRight,
+  FiPlus,
+  FiTrash,
+} from "react-icons/fi";
 import { v4 as uuidv4 } from "uuid";
 
 type TodoItem = {
@@ -137,6 +143,31 @@ const API = {
       success: true,
       data: {
         item: todoItemsFromDB[index],
+      },
+    };
+  },
+  "/removeItem": (id: string) => {
+    const todoItemsFromDB = JSON.parse(
+      localStorage.getItem("todoItems")!
+    ) as TodoItem[];
+
+    const index = todoItemsFromDB.findIndex((item) => item.id === id);
+
+    if (index <= -1) {
+      throw new Error("Internal Error");
+    }
+
+    const newTodoItems = [
+      ...todoItemsFromDB.slice(0, index),
+      ...todoItemsFromDB.slice(index + 1),
+    ];
+
+    localStorage.setItem("todoItems", JSON.stringify(newTodoItems));
+
+    return {
+      success: true,
+      data: {
+        id,
       },
     };
   },
@@ -350,48 +381,88 @@ function App() {
                       <div
                         style={{
                           display: "flex",
-                          gap: 5,
+                          justifyContent: "space-between",
                           alignItems: "center",
                         }}
                       >
-                        <button
+                        <div
                           style={{
-                            background: "none",
-                            border: "1px solid #CFFF48",
-                            borderRadius: 10,
-                            padding: "5px 7px",
-                            color: "#CFFF48",
-                            fontWeight: "bold",
+                            display: "flex",
+                            gap: 5,
+                            alignItems: "center",
                           }}
-                          onClick={handleCancelEditInput}
                         >
-                          취소
-                        </button>
-                        <button
-                          style={{
-                            background: "#CFFF48",
-                            border: "none",
-                            borderRadius: 10,
-                            padding: "5px 7px",
-                            color: "#1E1E1E",
-                            fontWeight: "bold",
-                          }}
+                          <button
+                            style={{
+                              background: "none",
+                              border: "1px solid #CFFF48",
+                              borderRadius: 10,
+                              padding: "5px 7px",
+                              color: "#CFFF48",
+                              fontWeight: "bold",
+                            }}
+                            onClick={handleCancelEditInput}
+                          >
+                            취소
+                          </button>
+                          <button
+                            style={{
+                              background: "#CFFF48",
+                              border: "none",
+                              borderRadius: 10,
+                              padding: "5px 7px",
+                              color: "#1E1E1E",
+                              fontWeight: "bold",
+                            }}
+                            onClick={() => {
+                              const result = API["/editTitle"]({
+                                title: editInput,
+                                id: item.id,
+                              });
+
+                              if (result.success === false) {
+                                throw new Error("Internal Error");
+                              }
+
+                              setTodoItems([...todoItems, result.data.item]);
+                              handleCancelEditInput();
+                            }}
+                          >
+                            저장
+                          </button>
+                        </div>
+                        <div
                           onClick={() => {
-                            const result = API["/editTitle"]({
-                              title: editInput,
-                              id: item.id,
-                            });
+                            // confirm 프롬프트
+                            const isConfirm =
+                              window.confirm("정말 삭제하시겠습니까?");
 
-                            if (result.success === false) {
-                              throw new Error("Internal Error");
+                            if (isConfirm) {
+                              const result = API["/removeItem"](item.id);
+
+                              if (!result.success) {
+                                throw new Error("Internal Error");
+                              }
+
+                              setTodoItems(
+                                todoItems.filter(
+                                  (item) => item.id !== result.data.id
+                                )
+                              );
                             }
-
-                            setTodoItems([...todoItems, result.data.item]);
-                            handleCancelEditInput();
+                          }}
+                          style={{
+                            border: "1px solid #666",
+                            borderRadius: 10,
+                            width: 28,
+                            height: 25,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
                           }}
                         >
-                          저장
-                        </button>
+                          <FiTrash color="#666" />
+                        </div>
                       </div>
                     </div>
                   )}
