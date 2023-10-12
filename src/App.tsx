@@ -78,7 +78,16 @@ function App() {
   const [editInput, setEditInput] = useState<string>("");
 
   useEffect(() => {
-    setTodoItems(defaultItems);
+    const todoItemsFromLocalStorage = JSON.parse(
+      localStorage.getItem("todoItems") ?? "[]"
+    ) as TodoItem[];
+
+    // 날짜에 맞게 필터링
+    const currentDateString = getDateString(currentDate);
+    const newTodoItems = todoItemsFromLocalStorage.filter(
+      (item) => item.createdAt === currentDateString
+    );
+    setTodoItems(newTodoItems);
   }, [currentDate]);
 
   function handleDone(index: number) {
