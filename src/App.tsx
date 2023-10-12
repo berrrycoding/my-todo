@@ -87,6 +87,9 @@ function App() {
     const newTodoItems = todoItemsFromLocalStorage.filter(
       (item) => item.createdAt === currentDateString
     );
+
+    // index에 맞게 오름차순으로 정렬
+    newTodoItems.sort((a, b) => a.index - b.index);
     setTodoItems(newTodoItems);
   }, [currentDate]);
 
@@ -101,6 +104,13 @@ function App() {
       type: "default",
     });
     setAddInput("");
+  }
+
+  function handleCancelEditInput() {
+    setMode({
+      type: "default",
+    });
+    setEditInput("");
   }
 
   return (
@@ -221,37 +231,143 @@ function App() {
             </div>
           </div>
         )}
-        {todoItems?.map((item, index) => (
-          <div
-            key={item.id}
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "5px 0",
-            }}
-          >
-            {item.isDone && (
-              <>
-                <div style={{ color: "#666", textDecoration: "line-through" }}>
-                  {item.title}
-                </div>
-                <div onClick={() => handleDone(index)}>
-                  <FiCheck color="#CFFF48" size={26} />
-                </div>
-              </>
-            )}
-            {!item.isDone && (
-              <>
-                <div style={{ color: "#fff" }}>{item.title}</div>
-                <div onClick={() => handleDone(index)}>
-                  <FiCheck color="#666" size={26} />
-                </div>
-              </>
-            )}
-          </div>
-        ))}
+        {todoItems?.map((item, index) => {
+          const isEditMode = mode.type === "edit" && mode.id === item.id;
+
+          return (
+            <div
+              key={item.id}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "5px 0",
+              }}
+            >
+              {item.isDone && (
+                <>
+                  <div
+                    style={{ color: "#666", textDecoration: "line-through" }}
+                  >
+                    {item.title}
+                  </div>
+                  <div onClick={() => handleDone(index)}>
+                    <FiCheck color="#CFFF48" size={26} />
+                  </div>
+                </>
+              )}
+              {!item.isDone && (
+                <>
+                  {isEditMode && (
+                    <div style={{ width: "100%" }}>
+                      <input
+                        type="text"
+                        value={editInput}
+                        onChange={(e) => setEditInput(e.target.value)}
+                        style={{
+                          width: "100%",
+                          background: "none",
+                          border: "none",
+                          borderBottom: "1px solid #666",
+                          padding: "7px 0",
+                          fontWeight: "bold",
+                          fontSize: 16,
+                          color: "#fff",
+                        }}
+                      />
+                      <div style={{ height: 5 }} />
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 5,
+                          alignItems: "center",
+                        }}
+                      >
+                        <button
+                          style={{
+                            background: "none",
+                            border: "1px solid #CFFF48",
+                            borderRadius: 10,
+                            padding: "5px 7px",
+                            color: "#CFFF48",
+                            fontWeight: "bold",
+                          }}
+                          onClick={handleCancelEditInput}
+                        >
+                          취소
+                        </button>
+                        <button
+                          style={{
+                            background: "#CFFF48",
+                            border: "none",
+                            borderRadius: 10,
+                            padding: "5px 7px",
+                            color: "#1E1E1E",
+                            fontWeight: "bold",
+                          }}
+                          onClick={() => {
+                            // 수정
+                            const todoItemsFromDB = JSON.parse(
+                              localStorage.getItem("todoItems")!
+                            ) as TodoItem[];
+
+                            const index = todoItemsFromDB.findIndex(
+                              (item) => item.id === mode.id
+                            );
+
+                            if (index <= -1) {
+                              throw new Error("Internal Error");
+                            }
+
+                            todoItemsFromDB[index] = {
+                              ...todoItemsFromDB[index],
+                              title: editInput,
+                            };
+
+                            setTodoItems(
+                              todoItemsFromDB
+                                .filter(
+                                  (item) =>
+                                    item.createdAt ===
+                                    getDateString(currentDate)
+                                )
+                                .sort((a, b) => a.index - b.index)
+                            );
+                            localStorage.setItem(
+                              "todoItems",
+                              JSON.stringify(todoItemsFromDB)
+                            );
+
+                            handleCancelEditInput();
+                          }}
+                        >
+                          저장
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {!isEditMode && (
+                    <>
+                      <div
+                        style={{ color: "#fff" }}
+                        onClick={() => {
+                          setMode({ type: "edit", id: item.id });
+                          setEditInput(item.title);
+                        }}
+                      >
+                        {item.title}
+                      </div>
+                      <div onClick={() => handleDone(index)}>
+                        <FiCheck color="#666" size={26} />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </main>
       <div
         style={{
