@@ -7,6 +7,7 @@ import {
   FiTrash,
 } from "react-icons/fi";
 import { API } from "./apis";
+import { colors } from "./theme/colors";
 import { DateObject, TodoItem } from "./types";
 import { extractDateObject, getDateString, shiftDateBy } from "./utils/date";
 
@@ -64,7 +65,7 @@ function App() {
   }
 
   return (
-    <div style={{ background: "#1E1E1E", height: "100vh" }}>
+    <div style={{ background: colors.dark, height: "100vh" }}>
       <header
         style={{
           display: "flex",
@@ -81,13 +82,15 @@ function App() {
             setCurrentDate(extractDateObject(previousDate));
           }}
         >
-          <FiChevronLeft size={24} color="#fff" />
+          <FiChevronLeft size={24} color={colors.white} />
         </div>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontWeight: "bold", fontSize: 24, color: "#fff" }}>
+          <div
+            style={{ fontWeight: "bold", fontSize: 24, color: colors.white }}
+          >
             {currentDate.month}월 {currentDate.date}일
           </div>
-          <div style={{ color: "#BCBCBC" }}>{currentDate.year}년</div>
+          <div style={{ color: colors.gray[0] }}>{currentDate.year}년</div>
         </div>
         <div
           onClick={() => {
@@ -96,7 +99,7 @@ function App() {
             setCurrentDate(extractDateObject(previousDate));
           }}
         >
-          <FiChevronRight size={24} color="#fff" />
+          <FiChevronRight size={24} color={colors.white} />
         </div>
       </header>
       <main
@@ -118,11 +121,11 @@ function App() {
                 width: "100%",
                 background: "none",
                 border: "none",
-                borderBottom: "1px solid #666",
+                borderBottom: `1px solid ${colors.gray[1]}`,
                 padding: "7px 0",
                 fontWeight: "bold",
                 fontSize: 16,
-                color: "#fff",
+                color: colors.white,
               }}
             />
             <div style={{ height: 5 }} />
@@ -130,10 +133,10 @@ function App() {
               <button
                 style={{
                   background: "none",
-                  border: "1px solid #CFFF48",
+                  border: `1px solid ${colors.primary}`,
                   borderRadius: 10,
                   padding: "5px 7px",
-                  color: "#CFFF48",
+                  color: colors.primary,
                   fontWeight: "bold",
                 }}
                 onClick={handleCancelAddInput}
@@ -142,11 +145,11 @@ function App() {
               </button>
               <button
                 style={{
-                  background: "#CFFF48",
+                  background: colors.primary,
                   border: "none",
                   borderRadius: 10,
                   padding: "5px 7px",
-                  color: "#1E1E1E",
+                  color: colors.dark,
                   fontWeight: "bold",
                 }}
                 onClick={() => {
@@ -186,12 +189,15 @@ function App() {
               {item.isDone && (
                 <>
                   <div
-                    style={{ color: "#666", textDecoration: "line-through" }}
+                    style={{
+                      color: colors.gray[1],
+                      textDecoration: "line-through",
+                    }}
                   >
                     {item.title}
                   </div>
                   <div onClick={() => handleDone(item.id)}>
-                    <FiCheck color="#CFFF48" size={26} />
+                    <FiCheck color={colors.primary} size={26} />
                   </div>
                 </>
               )}
@@ -207,11 +213,11 @@ function App() {
                           width: "100%",
                           background: "none",
                           border: "none",
-                          borderBottom: "1px solid #666",
+                          borderBottom: `1px solid ${colors.gray[1]}`,
                           padding: "7px 0",
                           fontWeight: "bold",
                           fontSize: 16,
-                          color: "#fff",
+                          color: colors.white,
                         }}
                       />
                       <div style={{ height: 5 }} />
@@ -232,10 +238,10 @@ function App() {
                           <button
                             style={{
                               background: "none",
-                              border: "1px solid #CFFF48",
+                              border: `1px solid ${colors.primary}`,
                               borderRadius: 10,
                               padding: "5px 7px",
-                              color: "#CFFF48",
+                              color: colors.primary,
                               fontWeight: "bold",
                             }}
                             onClick={handleCancelEditInput}
@@ -244,11 +250,11 @@ function App() {
                           </button>
                           <button
                             style={{
-                              background: "#CFFF48",
+                              background: colors.primary,
                               border: "none",
                               borderRadius: 10,
                               padding: "5px 7px",
-                              color: "#1E1E1E",
+                              color: colors.dark,
                               fontWeight: "bold",
                             }}
                             onClick={() => {
@@ -289,7 +295,7 @@ function App() {
                             }
                           }}
                           style={{
-                            border: "1px solid #666",
+                            border: `1px solid ${colors.gray[1]}}`,
                             borderRadius: 10,
                             width: 28,
                             height: 25,
@@ -298,7 +304,7 @@ function App() {
                             alignItems: "center",
                           }}
                         >
-                          <FiTrash color="#666" />
+                          <FiTrash color={colors.gray[1]} />
                         </div>
                       </div>
                     </div>
@@ -306,7 +312,7 @@ function App() {
                   {!isEditMode && (
                     <>
                       <div
-                        style={{ color: "#fff" }}
+                        style={{ color: colors.white }}
                         onClick={() => {
                           setMode({ type: "edit", id: item.id });
                           setEditInput(item.title);
@@ -315,7 +321,7 @@ function App() {
                         {item.title}
                       </div>
                       <div onClick={() => handleDone(item.id)}>
-                        <FiCheck color="#666" size={26} />
+                        <FiCheck color={colors.gray[1]} size={26} />
                       </div>
                     </>
                   )}
@@ -330,7 +336,7 @@ function App() {
           width: 35,
           height: 35,
           borderRadius: 60,
-          backgroundColor: "#CFFF48",
+          backgroundColor: colors.primary,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -340,7 +346,7 @@ function App() {
         }}
         onClick={() => setMode({ type: "add" })}
       >
-        <FiPlus color="#1E1E1E" size={23} />
+        <FiPlus color={colors.dark} size={23} />
       </div>
     </div>
   );
