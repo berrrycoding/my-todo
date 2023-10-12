@@ -71,6 +71,12 @@ function App() {
     setTodoItems(defaultItems);
   }, []);
 
+  function handleDone(index: number) {
+    const newTodoItems = [...todoItems!];
+    newTodoItems[index].isDone = !newTodoItems[index].isDone;
+    setTodoItems(newTodoItems);
+  }
+
   return (
     <div style={{ background: "#1E1E1E", height: "100vh" }}>
       <header
@@ -115,7 +121,7 @@ function App() {
           gap: 15,
         }}
       >
-        {todoItems?.map((item) => (
+        {todoItems?.map((item, index) => (
           <div
             key={item.id}
             style={{
@@ -131,13 +137,17 @@ function App() {
                 <div style={{ color: "#666", textDecoration: "line-through" }}>
                   {item.title}
                 </div>
-                <FiCheck color="#CFFF48" size={26} />
+                <div onClick={() => handleDone(index)}>
+                  <FiCheck color="#CFFF48" size={26} />
+                </div>
               </>
             )}
             {!item.isDone && (
               <>
                 <div style={{ color: "#fff" }}>{item.title}</div>
-                <FiCheck color="#666" size={26} />
+                <div onClick={() => handleDone(index)}>
+                  <FiCheck color="#666" size={26} />
+                </div>
               </>
             )}
           </div>
