@@ -41,13 +41,13 @@ const defaultItems: TodoItem[] = [
   },
 ];
 
-type DateItem = {
+type DateObject = {
   year: number;
   month: number;
   date: number;
 };
 
-function extractDate(date: Date) {
+function extractDateObject(date: Date) {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const dateOfMonth = date.getDate();
@@ -55,9 +55,15 @@ function extractDate(date: Date) {
   return { year, month, date: dateOfMonth };
 }
 
+function shiftDateBy(date: DateObject, diff: number) {
+  const newDate = new Date(date.year, date.month - 1, date.date);
+  newDate.setDate(newDate.getDate() + diff);
+  return newDate;
+}
+
 function App() {
-  const [currentDate, setCurrentDate] = useState<DateItem>(
-    extractDate(new Date())
+  const [currentDate, setCurrentDate] = useState<DateObject>(
+    extractDateObject(new Date())
   );
   const [todoItems, setTodoItems] = useState<TodoItem[]>();
 
@@ -76,7 +82,13 @@ function App() {
           padding: 15,
         }}
       >
-        <div>
+        <div
+          onClick={() => {
+            // 전 날로 currentDate가 변경
+            const previousDate = shiftDateBy(currentDate, -1);
+            setCurrentDate(extractDateObject(previousDate));
+          }}
+        >
           <FiChevronLeft size={24} color="#fff" />
         </div>
         <div style={{ textAlign: "center" }}>
@@ -85,7 +97,13 @@ function App() {
           </div>
           <div style={{ color: "#BCBCBC" }}>{currentDate.year}년</div>
         </div>
-        <div>
+        <div
+          onClick={() => {
+            // 다음 날로 currentDate가 변경
+            const previousDate = shiftDateBy(currentDate, 1);
+            setCurrentDate(extractDateObject(previousDate));
+          }}
+        >
           <FiChevronRight size={24} color="#fff" />
         </div>
       </header>
