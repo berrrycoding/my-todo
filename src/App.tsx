@@ -10,37 +10,6 @@ type TodoItem = {
   createdAt: string; // yyyy-mm-dd 문자열로 저장
 };
 
-const defaultItems: TodoItem[] = [
-  {
-    index: 0,
-    id: "a1",
-    title: "할일 1입니다.",
-    isDone: false,
-    createdAt: "2023-10-12",
-  },
-  {
-    index: 1,
-    id: "b2",
-    title: "할일 2입니다.",
-    isDone: false,
-    createdAt: "2023-10-12",
-  },
-  {
-    index: 2,
-    id: "c3",
-    title: "할일 3입니다.",
-    isDone: false,
-    createdAt: "2023-10-12",
-  },
-  {
-    index: 3,
-    id: "d4",
-    title: "할일 4입니다.",
-    isDone: true,
-    createdAt: "2023-10-12",
-  },
-];
-
 type DateObject = {
   year: number;
   month: number;
@@ -65,6 +34,114 @@ function shiftDateBy(date: DateObject, diff: number) {
   return newDate;
 }
 
+const API = {
+  "/getItems": (currentDate: string) => {
+    const todoItemsFromDB = JSON.parse(
+      localStorage.getItem("todoItems")!
+    ) as TodoItem[];
+
+    // 날짜에 맞게 필터링
+    const newTodoItems = todoItemsFromDB.filter(
+      (item) => item.createdAt === currentDate
+    );
+
+    // index에 맞게 오름차순으로 정렬
+    newTodoItems.sort((a, b) => a.index - b.index);
+
+    return {
+      success: true,
+      data: {
+        items: newTodoItems,
+      },
+    };
+  },
+  "/doneItems": (id: string) => {
+    const todoItemsFromDB = JSON.parse(
+      localStorage.getItem("todoItems")!
+    ) as TodoItem[];
+
+    const index = todoItemsFromDB.findIndex((item) => item.id === id);
+
+    if (index <= -1) {
+      throw new Error("Internal Error");
+    }
+
+    todoItemsFromDB[index] = {
+      ...todoItemsFromDB[index],
+      isDone: !todoItemsFromDB[index].isDone,
+    };
+
+    localStorage.setItem("todoItems", JSON.stringify(todoItemsFromDB));
+
+    return {
+      success: true,
+      data: {
+        newItem: todoItemsFromDB[index],
+      },
+    };
+  },
+  "/addTodoItem": ({
+    title,
+    currentDate,
+  }: {
+    title: string;
+    currentDate: string;
+  }) => {
+    const lastIndex = localStorage.getItem("lastIndex") ?? "0";
+    const newLastIndex = parseInt(lastIndex) + 1;
+
+    const newTodoItem = {
+      id: uuidv4(),
+      title,
+      isDone: false,
+      index: newLastIndex,
+      createdAt: currentDate,
+    };
+
+    const originalTodoItems = JSON.parse(
+      localStorage.getItem("todoItems") ?? "[]"
+    );
+
+    localStorage.setItem("lastIndex", newLastIndex.toString());
+    localStorage.setItem(
+      "todoItems",
+      JSON.stringify([...originalTodoItems, newTodoItem])
+    );
+
+    return {
+      success: true,
+      data: {
+        item: newTodoItem,
+      },
+    };
+  },
+  "/editTitle": ({ title, id }: { title: string; id: string }) => {
+    const todoItemsFromDB = JSON.parse(
+      localStorage.getItem("todoItems")!
+    ) as TodoItem[];
+
+    const index = todoItemsFromDB.findIndex((item) => item.id === id);
+
+    if (index <= -1) {
+      throw new Error("Internal Error");
+    }
+
+    todoItemsFromDB[index] = {
+      ...todoItemsFromDB[index],
+      title,
+    };
+
+    localStorage.setItem("todoItems", JSON.stringify(todoItemsFromDB));
+
+    return {
+      success: true,
+      data: {
+        item: todoItemsFromDB[index],
+      },
+    };
+  },
+};
+
 function App() {
   const [currentDate, setCurrentDate] = useState<DateObject>(
     extractDateObject(new Date())
@@ -78,25 +155,30 @@ function App() {
   const [editInput, setEditInput] = useState<string>("");
 
   useEffect(() => {
-    const todoItemsFromLocalStorage = JSON.parse(
-      localStorage.getItem("todoItems") ?? "[]"
-    ) as TodoItem[];
-
-    // 날짜에 맞게 필터링
-    const currentDateString = getDateString(currentDate);
-    const newTodoItems = todoItemsFromLocalStorage.filter(
-      (item) => item.createdAt === currentDateString
-    );
-
-    // index에 맞게 오름차순으로 정렬
-    newTodoItems.sort((a, b) => a.index - b.index);
-    setTodoItems(newTodoItems);
+    const result = API["/getItems"](getDateString(currentDate));
+    setTodoItems(result.data.items);
   }, [currentDate]);
 
-  function handleDone(index: number) {
-    const newTodoItems = [...todoItems!];
-    newTodoItems[index].isDone = !newTodoItems[index].isDone;
-    setTodoItems(newTodoItems);
+  function handleDone(id: string) {
+    const result = API["/doneItems"](id);
+
+    if (result.success === false) {
+      throw new Error("Internal Error");
+    }
+
+    const newItem = result.data.newItem as TodoItem;
+
+    const index = todoItems.findIndex((item) => item.id === id);
+
+    if (index <= -1) {
+      throw new Error("Internal Error");
+    }
+
+    setTodoItems([
+      ...todoItems.slice(0, index),
+      newItem,
+      ...todoItems.slice(index + 1),
+    ]);
   }
 
   function handleCancelAddInput() {
@@ -200,28 +282,16 @@ function App() {
                   fontWeight: "bold",
                 }}
                 onClick={() => {
-                  const lastIndex = localStorage.getItem("lastIndex") ?? "0";
-                  const newLastIndex = parseInt(lastIndex) + 1;
-
-                  const newTodoItem = {
-                    id: uuidv4(),
+                  const result = API["/addTodoItem"]({
                     title: addInput,
-                    isDone: false,
-                    index: newLastIndex,
-                    createdAt: getDateString(currentDate),
-                  };
+                    currentDate: getDateString(currentDate),
+                  });
 
-                  const originalTodoItems = JSON.parse(
-                    localStorage.getItem("todoItems") ?? "[]"
-                  );
+                  if (result.success === false) {
+                    throw new Error("Internal Error");
+                  }
 
-                  localStorage.setItem("lastIndex", newLastIndex.toString());
-                  localStorage.setItem(
-                    "todoItems",
-                    JSON.stringify([...originalTodoItems, newTodoItem])
-                  );
-
-                  setTodoItems([...todoItems, newTodoItem]);
+                  setTodoItems([...todoItems, result.data.item]);
 
                   handleCancelAddInput();
                 }}
@@ -231,7 +301,7 @@ function App() {
             </div>
           </div>
         )}
-        {todoItems?.map((item, index) => {
+        {todoItems.map((item) => {
           const isEditMode = mode.type === "edit" && mode.id === item.id;
 
           return (
@@ -252,7 +322,7 @@ function App() {
                   >
                     {item.title}
                   </div>
-                  <div onClick={() => handleDone(index)}>
+                  <div onClick={() => handleDone(item.id)}>
                     <FiCheck color="#CFFF48" size={26} />
                   </div>
                 </>
@@ -307,38 +377,16 @@ function App() {
                             fontWeight: "bold",
                           }}
                           onClick={() => {
-                            // 수정
-                            const todoItemsFromDB = JSON.parse(
-                              localStorage.getItem("todoItems")!
-                            ) as TodoItem[];
+                            const result = API["/editTitle"]({
+                              title: editInput,
+                              id: item.id,
+                            });
 
-                            const index = todoItemsFromDB.findIndex(
-                              (item) => item.id === mode.id
-                            );
-
-                            if (index <= -1) {
+                            if (result.success === false) {
                               throw new Error("Internal Error");
                             }
 
-                            todoItemsFromDB[index] = {
-                              ...todoItemsFromDB[index],
-                              title: editInput,
-                            };
-
-                            setTodoItems(
-                              todoItemsFromDB
-                                .filter(
-                                  (item) =>
-                                    item.createdAt ===
-                                    getDateString(currentDate)
-                                )
-                                .sort((a, b) => a.index - b.index)
-                            );
-                            localStorage.setItem(
-                              "todoItems",
-                              JSON.stringify(todoItemsFromDB)
-                            );
-
+                            setTodoItems([...todoItems, result.data.item]);
                             handleCancelEditInput();
                           }}
                         >
@@ -358,7 +406,7 @@ function App() {
                       >
                         {item.title}
                       </div>
-                      <div onClick={() => handleDone(index)}>
+                      <div onClick={() => handleDone(item.id)}>
                         <FiCheck color="#666" size={26} />
                       </div>
                     </>
