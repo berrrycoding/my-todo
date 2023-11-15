@@ -19,6 +19,7 @@ export default function Main() {
         left: 0,
         right: 0,
         overflowY: "auto",
+        scrollPaddingTop: 80,
       }}
     >
       <DateNavigation />
