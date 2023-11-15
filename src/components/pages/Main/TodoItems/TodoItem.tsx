@@ -1,29 +1,35 @@
 import { useState } from "react";
 import { FiCheck, FiTrash } from "react-icons/fi";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import { colors } from "../../../../theme/colors";
-import { ItemMode, TodoItem as TodoItemType } from "../../../../types";
+import { TodoItem as TodoItemType } from "../../../../types";
+import { itemModeAtom } from "../states/itemMode";
 
 interface Props {
   item: TodoItemType;
-  itemMode: ItemMode;
   onItemDone: (id: TodoItemType["id"]) => void;
-  onEditItemMode: (id: TodoItemType["id"]) => void;
   onRemoveItem: (id: TodoItemType["id"]) => void;
   onEditItem: (item: TodoItemType) => void;
-  onResetItemMode: () => void;
 }
 
 export default function TodoItem({
   item,
-  itemMode: { type: modeType, id: editItemId },
-  onEditItemMode,
-  onResetItemMode,
   onItemDone,
   onEditItem,
   onRemoveItem,
 }: Props) {
+  const [itemMode, setItemMode] = useRecoilState(itemModeAtom);
+
+  const { type: modeType, id: editItemId } = itemMode;
   const { id, isDone, title } = item;
   const isEditMode = modeType === "edit" && editItemId === id;
+
+  function handleEditItemMode() {
+    setItemMode({
+      type: "edit",
+      id,
+    });
+  }
 
   return (
     <div
@@ -38,10 +44,7 @@ export default function TodoItem({
     >
       {!isDone && !isEditMode && (
         <>
-          <div
-            style={{ color: colors.white }}
-            onClick={() => onEditItemMode(item.id)}
-          >
+          <div style={{ color: colors.white }} onClick={handleEditItemMode}>
             {item.title}
           </div>
           <div onClick={() => onItemDone(item.id)}>
@@ -54,7 +57,6 @@ export default function TodoItem({
           item={item}
           onRemoveItem={onRemoveItem}
           onEditItem={onEditItem}
-          onCancelEditMode={onResetItemMode}
         />
       )}
       {isDone && (
@@ -80,13 +82,12 @@ function EditItemInput({
   item,
   onRemoveItem,
   onEditItem,
-  onCancelEditMode,
 }: {
   item: TodoItemType;
   onRemoveItem: (id: TodoItemType["id"]) => void;
   onEditItem: (item: TodoItemType) => void;
-  onCancelEditMode: () => void;
 }) {
+  const resetItemMode = useResetRecoilState(itemModeAtom);
   const [editInput, setEditInput] = useState<string>(item.title);
 
   return (
@@ -130,7 +131,7 @@ function EditItemInput({
               color: colors.primary,
               fontWeight: "bold",
             }}
-            onClick={onCancelEditMode}
+            onClick={resetItemMode}
           >
             취소
           </button>

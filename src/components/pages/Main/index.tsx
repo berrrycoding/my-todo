@@ -1,26 +1,17 @@
+import { useResetRecoilState } from "recoil";
 import { colors } from "../../../theme/colors";
-import { DateObject, ItemMode, TodoItem } from "../../../types";
+import { TodoItem } from "../../../types";
 import AddItemButton from "./AddItemButton";
 import AddItemInput from "./AddItemInput";
 import DateNavigation from "./DateNavigation";
 import TodoItems from "./TodoItems";
-import { useCurrentDate } from "./hooks/useCurrentDate";
-import { useItemMode } from "./hooks/useItemMode";
 import { useTodoItems } from "./hooks/useTodoItems";
+import { itemModeAtom } from "./states/itemMode";
 
 export default function Main() {
-  const { currentDate, onMovePreviousMonth, onMoveNextMonth } =
-    useCurrentDate();
-  const { itemMode, onAddItemMode, onEditItemMode, onResetItemMode } =
-    useItemMode();
-
   return (
     <div style={{ background: colors.dark, height: "100vh" }}>
-      <DateNavigation
-        currentDate={currentDate}
-        onMovePreviousMonth={onMovePreviousMonth}
-        onMoveNextMonth={onMoveNextMonth}
-      />
+      <DateNavigation />
       <main
         style={{
           padding: 15,
@@ -29,48 +20,29 @@ export default function Main() {
           gap: 15,
         }}
       >
-        <Content
-          currentDate={currentDate}
-          itemMode={itemMode}
-          onEditItemMode={onEditItemMode}
-          onResetItemMode={onResetItemMode}
-        />
+        <Content />
       </main>
-      <AddItemButton onAddMode={onAddItemMode} />
+      <AddItemButton />
     </div>
   );
 }
 
-function Content({
-  currentDate,
-  itemMode,
-  onEditItemMode,
-  onResetItemMode,
-}: {
-  currentDate: DateObject;
-  itemMode: ItemMode;
-  onEditItemMode: (id: TodoItem["id"]) => void;
-  onResetItemMode: () => void;
-}) {
+function Content() {
   const { todoItems, onDoneItem, onAddItem, onEditItem, onRemoveItem } =
-    useTodoItems({ currentDate });
+    useTodoItems();
+  const resetItemMode = useResetRecoilState(itemModeAtom);
 
   function handleEditItem(item: TodoItem) {
     onEditItem(item);
-    onResetItemMode();
+    resetItemMode();
   }
 
   return (
     <>
-      {itemMode.type === "add" && (
-        <AddItemInput onResetMode={onResetItemMode} onAddTodoItem={onAddItem} />
-      )}
+      <AddItemInput onAddTodoItem={onAddItem} />
       <TodoItems
         items={todoItems}
-        itemMode={itemMode}
         onItemDone={onDoneItem}
-        onEditItemMode={onEditItemMode}
-        onResetItemMode={onResetItemMode}
         onRemoveItem={onRemoveItem}
         onEditItem={handleEditItem}
       />

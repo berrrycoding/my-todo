@@ -1,17 +1,25 @@
 import { useState } from "react";
+import { useRecoilValue, useResetRecoilState } from "recoil";
 import { colors } from "../../../../theme/colors";
 import { TodoItem } from "../../../../types";
+import { itemModeAtom } from "../states/itemMode";
 
 interface Props {
-  onResetMode: () => void;
   onAddTodoItem: (item: Pick<TodoItem, "title">) => void;
 }
 
-export default function AddItemInput({ onResetMode, onAddTodoItem }: Props) {
+export default function AddItemInput(props: Props) {
+  const itemMode = useRecoilValue(itemModeAtom);
+
+  return <>{itemMode.type === "add" && <Input {...props} />}</>;
+}
+
+function Input({ onAddTodoItem }: Props) {
   const [addInput, setAddInput] = useState<string>("");
+  const resetItemMode = useResetRecoilState(itemModeAtom);
 
   function handleCancelAddInput() {
-    onResetMode();
+    resetItemMode();
     setAddInput("");
   }
 

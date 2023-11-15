@@ -1,18 +1,11 @@
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { colors } from "../../../../theme/colors";
-import { DateObject } from "../../../../types";
+import { useCurrentDate } from "../hooks/useCurrentDate";
 
-interface Props {
-  currentDate: DateObject;
-  onMovePreviousMonth: () => void;
-  onMoveNextMonth: () => void;
-}
+export default function DateNavigation() {
+  const { currentDate, onMovePreviousMonth, onMoveNextMonth } =
+    useCurrentDate();
 
-export default function DateNavigation({
-  currentDate,
-  onMovePreviousMonth,
-  onMoveNextMonth,
-}: Props) {
   const { month, date, year } = currentDate;
 
   return (

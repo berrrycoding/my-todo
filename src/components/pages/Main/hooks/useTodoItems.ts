@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 import { API } from "../../../../apis";
-import { DateObject, TodoItem } from "../../../../types";
+import { TodoItem } from "../../../../types";
 import { getDateString } from "../../../../utils/date";
+import { currentDateAtom } from "../states/currentDate";
 
-export function useTodoItems({ currentDate }: { currentDate: DateObject }) {
+export function useTodoItems() {
+  const currentDate = useRecoilValue(currentDateAtom);
   const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
 
   useEffect(() => {

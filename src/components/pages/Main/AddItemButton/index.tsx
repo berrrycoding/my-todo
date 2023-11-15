@@ -1,12 +1,18 @@
 import { memo } from "react";
 import { FiPlus } from "react-icons/fi";
+import { useSetRecoilState } from "recoil";
 import { colors } from "../../../../theme/colors";
+import { itemModeAtom } from "../states/itemMode";
 
-interface Props {
-  onAddMode: () => void;
-}
+function AddItemButton() {
+  const setItemMode = useSetRecoilState(itemModeAtom);
 
-function AddItemButton({ onAddMode }: Props) {
+  function handleAddItemMode() {
+    setItemMode({
+      type: "add",
+    });
+  }
+
   return (
     <div
       style={{
@@ -21,7 +27,7 @@ function AddItemButton({ onAddMode }: Props) {
         right: 20,
         bottom: 20,
       }}
-      onClick={onAddMode}
+      onClick={handleAddItemMode}
     >
       <FiPlus color={colors.dark} size={23} />
     </div>
