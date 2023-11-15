@@ -11,3 +11,8 @@ export type DateObject = {
   month: number;
   date: number;
 };
+
+export type ItemMode = {
+  type: "add" | "edit" | "default";
+  id?: TodoItem["id"];
+};

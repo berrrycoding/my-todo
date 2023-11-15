@@ -4,7 +4,7 @@ import { TodoItem } from "../types";
 export const API = {
   "/getItems": (currentDate: string) => {
     const todoItemsFromDB = JSON.parse(
-      localStorage.getItem("todoItems")!
+      localStorage.getItem("todoItems") ?? "[]"
     ) as TodoItem[];
 
     // 날짜에 맞게 필터링
