@@ -16,6 +16,11 @@ export default function DateNavigation() {
         justifyContent: "space-between",
         alignItems: "center",
         padding: 15,
+        position: "sticky",
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: colors.dark,
       }}
     >
       <div onClick={onMovePreviousMonth}>
