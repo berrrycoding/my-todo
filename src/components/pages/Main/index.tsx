@@ -10,7 +10,16 @@ import { itemModeAtom } from "./states/itemMode";
 
 export default function Main() {
   return (
-    <div style={{ background: colors.dark, height: "100vh" }}>
+    <div
+      style={{
+        background: colors.dark,
+        height: "100vh",
+        paddingTop: "env(safe-area-inset-top)",
+        paddingRight: "env(safe-area-inset-right)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingLeft: "env(safe-area-inset-left)",
+      }}
+    >
       <DateNavigation />
       <main
         style={{
