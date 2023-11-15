@@ -13,11 +13,12 @@ export default function Main() {
     <div
       style={{
         background: colors.dark,
-        height: "100vh",
-        paddingTop: "env(safe-area-inset-top)",
-        paddingRight: "env(safe-area-inset-right)",
-        paddingBottom: "env(safe-area-inset-bottom)",
-        paddingLeft: "env(safe-area-inset-left)",
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        overflowY: "auto",
       }}
     >
       <DateNavigation />

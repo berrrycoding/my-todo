@@ -23,7 +23,7 @@ function AddItemButton() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        position: "absolute",
+        position: "fixed",
         right: 20,
         bottom: 20,
       }}
